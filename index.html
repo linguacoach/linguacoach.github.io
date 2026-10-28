@@ -1638,8 +1638,8 @@ footer{
       </summary>
 
       <p data-i18n="faq4Answer">
-        Once you've submitted your details, you can pay online
-        either with a credit card or via PayPal.
+        After submitting your booking request, you can complete
+        your payment securely through SumUp.
       </p>
 
     </details>
@@ -1787,7 +1787,7 @@ const translations = {
     or:"or",
     tenLessonText:"for a pack of 10.",
 
-    bookingNote:"After you send the request, you will see a confirmation message directly on this page. We will contact you to confirm the lesson.",
+    bookingNote:"After your request is sent successfully, you will be redirected to SumUp to complete payment. Your lesson is confirmed only after payment and scheduling are checked.",
 
     nameLabel:"Your name *",
     emailLabel:"Email address *",
@@ -1810,12 +1810,12 @@ const translations = {
     goalsLabel:"What would you like to work on?",
     goalsPlaceholder:"Conversation, work, travel, exams, grammar...",
 
-    submitButton:"Send booking request ↗",
+    submitButton:"Continue to payment ↗",
 
     privacyNote:"By sending a request, you agree to be contacted about your lesson.",
 
     sending:"Sending your request...",
-    success:"Thank you! Your request has been sent successfully. We will contact you soon to confirm your lesson.",
+    success:"Your request was sent successfully. Redirecting you to SumUp to complete payment…",
     error:"Sorry, something went wrong. Please try again in a moment.",
 
     faqEyebrow:"A few quick answers",
@@ -1831,7 +1831,7 @@ const translations = {
     faq3Answer:"You can request English, German or French lessons. Share your level and goals in the booking form so the lesson can be tailored to you.",
 
     faq4Question:"Can I pay online?",
-    faq4Answer:"Once you've submitted your details, you can pay online either with a credit card or via PayPal.",
+    faq4Answer:"After submitting your booking request, you can complete your payment securely through SumUp.",
 
     footerTagline:"Languages open doors. Start with one lesson.",
     footerLanguages:"Languages",
@@ -1920,7 +1920,7 @@ const translations = {
     or:"oppure",
     tenLessonText:"per un pacchetto di 10 lezioni.",
 
-    bookingNote:"Dopo aver inviato la richiesta, vedrai una conferma direttamente su questa pagina. Ti contatteremo per confermare la lezione.",
+    bookingNote:"Dopo l’invio corretto della richiesta, verrai reindirizzato a SumUp per completare il pagamento. La lezione sarà confermata solo dopo la verifica del pagamento e dell’orario.",
 
     nameLabel:"Il tuo nome *",
     emailLabel:"Indirizzo email *",
@@ -1943,12 +1943,12 @@ const translations = {
     goalsLabel:"Su cosa vorresti lavorare?",
     goalsPlaceholder:"Conversazione, lavoro, viaggi, esami, grammatica...",
 
-    submitButton:"Invia richiesta di prenotazione ↗",
+    submitButton:"Continua al pagamento ↗",
 
     privacyNote:"Inviando la richiesta, accetti di essere ricontattata/o per la tua lezione.",
 
     sending:"Invio della richiesta in corso...",
-    success:"Grazie! La tua richiesta è stata inviata con successo. Ti contatteremo presto per confermare la lezione.",
+    success:"Richiesta inviata correttamente. Ti stiamo reindirizzando a SumUp per completare il pagamento…",
     error:"Ci dispiace, si è verificato un problema. Riprova tra poco.",
 
     faqEyebrow:"Alcune risposte rapide",
@@ -1964,7 +1964,7 @@ const translations = {
     faq3Answer:"Puoi richiedere lezioni di inglese, tedesco o francese. Indica il tuo livello e i tuoi obiettivi nel modulo di prenotazione, così la lezione potrà essere personalizzata.",
 
     faq4Question:"Posso pagare online?",
-    faq4Answer:"Dopo aver inviato i tuoi dati, potrai pagare online con carta di credito oppure tramite PayPal.",
+    faq4Answer:"Dopo aver inviato la richiesta di prenotazione, potrai completare il pagamento in modo sicuro tramite SumUp.",
 
     footerTagline:"Le lingue aprono porte. Inizia con una lezione.",
     footerLanguages:"Lingue",
@@ -2073,21 +2073,8 @@ document.querySelectorAll("[data-pack]").forEach(link => {
 
     const select = document.getElementById("pack");
 
-    if(pack === "Single lesson"){
-
-      select.value =
-        currentLanguage === "it"
-          ? "Singola lezione — 25 €"
-          : "Single lesson — €25";
-
-    } else {
-
-      select.value =
-        currentLanguage === "it"
-          ? "Pacchetto di 10 lezioni — 230 €"
-          : "Pack of 10 lessons — €230";
-
-    }
+    // Select by option position so this works in both interface languages.
+    select.selectedIndex = pack === "Single lesson" ? 1 : 2;
 
   });
 
@@ -2161,21 +2148,20 @@ bookingForm.addEventListener("submit", async function(event){
       notice.textContent =
         t.success;
 
-      bookingForm.reset();
+      // Save the selected payment destination before resetting the form.
+      const selectedPack = document.getElementById("pack").value;
+      const paymentUrl = selectedPack.includes("10 lessons")
+        ? "https://pay.sumup.com/b2c/QZ0IQB9F"
+        : "https://pay.sumup.com/b2c/QFX8EBK0";
 
-      /*
-        Keep the success message visible.
-        Scroll gently to it so the visitor sees it.
-      */
+      submitButton.disabled = true;
+      submitButton.style.opacity = "0.7";
+      notice.scrollIntoView({ behavior:"smooth", block:"center" });
 
+      // Give the visitor a moment to see the confirmation, then open SumUp.
       setTimeout(() => {
-
-        notice.scrollIntoView({
-          behavior:"smooth",
-          block:"center"
-        });
-
-      },100);
+        window.location.href = paymentUrl;
+      }, 900);
 
     } else {
 
@@ -2197,8 +2183,11 @@ bookingForm.addEventListener("submit", async function(event){
 
   } finally{
 
-    submitButton.disabled = false;
-    submitButton.style.opacity = "1";
+    // Keep the button disabled after success while redirecting to SumUp.
+    if (!notice.classList.contains("success")) {
+      submitButton.disabled = false;
+      submitButton.style.opacity = "1";
+    }
 
   }
 
