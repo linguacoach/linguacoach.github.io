@@ -792,7 +792,26 @@ footer{
   }
 
 }
-</style>
+
+/* HERO VIDEO */
+.art.hero-video-wrap{
+  padding:0;
+  min-height:440px;
+  background:#e6eddb;
+}
+.hero-video-player{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:440px;
+  object-fit:cover;
+  border-radius:32px;
+}
+@media(max-width:900px){
+  .art.hero-video-wrap{min-height:390px;}
+  .hero-video-player{min-height:390px;}
+}
+\n</style>
 </head>
 
 <body>
@@ -884,43 +903,19 @@ footer{
   </div>
 
 
-  <div class="art" aria-label="Illustration of a language coach">
-
-    <div class="sun"></div>
-    <div class="orbit"></div>
-    <div class="orbit two"></div>
-
-    <div class="note one">
-      <strong>Bonjour! 👋</strong>
-      <small data-i18n="noteOne">
-        Let’s start talking
-      </small>
-    </div>
-
-    <div class="note three">
-      <strong data-i18n="noteThreeTitle">
-        Small steps, big progress
-      </strong>
-      <small data-i18n="noteThreeText">
-        Your goals. Your lesson.
-      </small>
-    </div>
-
-    <div class="note two">
-      <strong>Hallo! Hello! Salut!</strong>
-      <small data-i18n="noteTwo">
-        3 languages, one coach
-      </small>
-    </div>
-
-    <div class="person">
-      <div class="hair"></div>
-      <div class="head"></div>
-      <div class="neck"></div>
-      <div class="bodyshape"></div>
-      <div class="shirt"></div>
-    </div>
-
+  <div class="art hero-video-wrap" aria-label="Lingua Coach video">
+    <video
+      class="hero-video-player"
+      id="linguaCoachHeroVideo"
+      autoplay
+      controls
+      playsinline
+      webkit-playsinline
+      preload="auto"
+      aria-label="Lingua Coach — English, German and French lessons">
+      <source src="lingua-coach-video.mp4" type="video/mp4">
+      Your browser does not support HTML5 video.
+    </video>
   </div>
 
 </section>
@@ -2199,6 +2194,25 @@ bookingForm.addEventListener("submit", async function(event){
 ========================================================= */
 
 applyLanguage(currentLanguage);
+
+
+/* HERO VIDEO: attempt autoplay with sound.
+   Browsers that block audible autoplay will require the visitor to press Play. */
+const linguaCoachHeroVideo = document.getElementById("linguaCoachHeroVideo");
+if (linguaCoachHeroVideo) {
+  linguaCoachHeroVideo.muted = false;
+  linguaCoachHeroVideo.volume = 1;
+  const tryHeroVideoPlay = () => {
+    const playAttempt = linguaCoachHeroVideo.play();
+    if (playAttempt && typeof playAttempt.catch === "function") {
+      playAttempt.catch(() => {
+        // Audible autoplay may be blocked by the browser; native controls remain available.
+      });
+    }
+  };
+  tryHeroVideoPlay();
+  linguaCoachHeroVideo.addEventListener("canplay", tryHeroVideoPlay, { once:true });
+}
 
 </script>
 
